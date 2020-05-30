@@ -1,0 +1,7 @@
+spring:
+  profiles: default
+  main:
+    web-environment: false
+apiToken: ${API_TOKEN}
+projectAPIUrl: ${PROJECT_API_URL}
+prodEnvironmentName: ${PROD_ENVIRONMENT_NAME:prod}
