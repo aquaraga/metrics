@@ -5,3 +5,4 @@ spring:
 apiToken: ${API_TOKEN}
 projectAPIUrl: ${PROJECT_API_URL}
 prodEnvironmentName: ${PROD_ENVIRONMENT_NAME:prod}
+runHistoryInDays: ${RUN_HISTORY_IN_DAYS:90}

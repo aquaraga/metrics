@@ -6,6 +6,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class ReportService {
     public void consoleOut(FourKeyMetrics fourKeyMetrics) {
-        System.out.printf("Deployment frequency: %d", fourKeyMetrics.deploymentFrequency());
+        System.out.printf("Deployment frequency: %d\n", fourKeyMetrics.deploymentFrequency());
     }
 }

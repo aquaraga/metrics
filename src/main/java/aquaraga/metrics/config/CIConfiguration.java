@@ -12,6 +12,7 @@ public class CIConfiguration {
     private String apiToken;
     private String projectAPIUrl;
     private String prodEnvironmentName;
+    private int runHistoryInDays;
 
     public String getApiToken() {
         return apiToken;
@@ -35,5 +36,13 @@ public class CIConfiguration {
 
     public void setProdEnvironmentName(String prodEnvironmentName) {
         this.prodEnvironmentName = prodEnvironmentName;
+    }
+
+    public int getRunHistoryInDays() {
+        return runHistoryInDays;
+    }
+
+    public void setRunHistoryInDays(int runHistoryInDays) {
+        this.runHistoryInDays = runHistoryInDays;
     }
 }
