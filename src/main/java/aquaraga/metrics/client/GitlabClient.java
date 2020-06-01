@@ -68,7 +68,8 @@ public class GitlabClient implements CIClient {
 
         return new Commits(allCommits.stream()
                 .map(c -> new aquaraga.metrics.model.Commit(c.getId(),
-                        Date.from(LocalDateTime.parse(c.getCommitted_date().substring(0, c.getCommitted_date().indexOf('.'))).atZone(ZoneId.systemDefault()).toInstant())))
+                        Date.from(LocalDateTime.parse(c.getCommitted_date().substring(0, c.getCommitted_date().indexOf('.'))).atZone(ZoneId.systemDefault()).toInstant()),
+                        c.getParent_ids()))
                 .collect(Collectors.toList()));
     }
 
