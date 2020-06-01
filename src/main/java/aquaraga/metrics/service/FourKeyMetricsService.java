@@ -1,6 +1,7 @@
 package aquaraga.metrics.service;
 
 import aquaraga.metrics.client.CIClient;
+import aquaraga.metrics.model.Commits;
 import aquaraga.metrics.model.Deployments;
 import aquaraga.metrics.model.FourKeyMetrics;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +19,8 @@ public class FourKeyMetricsService {
 
     public FourKeyMetrics metrics() {
         Deployments deployments = ciClient.fetchDeployments();
-        FourKeyMetrics fourKeyMetrics = new FourKeyMetrics(deployments);
+        Commits commits = ciClient.fetchCommits();
+        FourKeyMetrics fourKeyMetrics = new FourKeyMetrics(deployments, commits);
         return fourKeyMetrics;
     }
 }
