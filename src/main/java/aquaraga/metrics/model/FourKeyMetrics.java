@@ -43,7 +43,6 @@ public class FourKeyMetrics {
             }
             deployedCommits.add(new DeployedCommit(commit, deploymentTime));
         }
-        return new LeadTimeMetrics(deployedCommits.stream()
-                .map(dc -> dc.getLeadTime()).collect(Collectors.toList()));
+        return new LeadTimeMetrics(deployedCommits);
     }
 }
