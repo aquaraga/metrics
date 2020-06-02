@@ -10,8 +10,11 @@ import java.time.Duration;
 public class ReportService {
     public void consoleOut(FourKeyMetrics fourKeyMetrics) {
         LeadTimeMetrics leadTimeMetrics = fourKeyMetrics.leadTime();
-        System.out.printf("Average Lead Time: %s\n", leadTimeMetrics.mean());
+        Duration meanLeadTime = leadTimeMetrics.mean();
+        System.out.printf("Average Lead Time: %d days %d hours\n", meanLeadTime.toDays(),
+                meanLeadTime.toHoursPart());
         System.out.printf("Deployment frequency: %d\n", fourKeyMetrics.deploymentFrequency());
+        System.out.printf("Change failure rate: %d%%\n", (int) Math.round(fourKeyMetrics.changeFailureRate() * 100));
 
         System.out.println("Lead time oddities: " + leadTimeMetrics.oddities(Duration.ofDays(10)));
     }

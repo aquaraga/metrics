@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class FourKeyMetrics {
 
@@ -18,7 +17,6 @@ public class FourKeyMetrics {
     }
 
     public long deploymentFrequency() {
-
         return deployments.uniqueCountByCommit();
     }
 
@@ -32,7 +30,7 @@ public class FourKeyMetrics {
         List<DeployedCommit> deployedCommits = new ArrayList<>();
         for (Commit commit :
                 commitsWithDeployments) {
-            Deployment deployment = deployments.forCommit(commit);
+            Deployment deployment = deployments.latestSuccessfulForCommit(commit);
             if (deployment != null) {
                 deploymentTime = deployment.timeDeployed();
             } else {
@@ -44,5 +42,9 @@ public class FourKeyMetrics {
             deployedCommits.add(new DeployedCommit(commit, deploymentTime));
         }
         return new LeadTimeMetrics(deployedCommits);
+    }
+
+    public double changeFailureRate() {
+        return ((double)deployments.failureCount()) / (deployments.failureCount() + deployments.successCount());
     }
 }
