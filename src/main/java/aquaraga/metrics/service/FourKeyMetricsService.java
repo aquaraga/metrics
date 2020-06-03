@@ -4,6 +4,7 @@ import aquaraga.metrics.client.CIClient;
 import aquaraga.metrics.config.CIConfiguration;
 import aquaraga.metrics.model.Commits;
 import aquaraga.metrics.model.Deployments;
+import aquaraga.metrics.model.DurationWindow;
 import aquaraga.metrics.model.FourKeyMetrics;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,8 +22,13 @@ public class FourKeyMetricsService {
     }
 
     public FourKeyMetrics metrics() {
-        Deployments deployments = ciClient.fetchDeployments();
-        Commits commits = ciClient.fetchCommits();
+        return metrics(new DurationWindow(configuration.getDeploymentWindowInDays(),
+                configuration.getShiftLeftInDays()));
+    }
+
+    public FourKeyMetrics metrics(DurationWindow durationWindow) {
+        Deployments deployments = ciClient.fetchDeployments(durationWindow);
+        Commits commits = ciClient.fetchCommits(durationWindow);
         FourKeyMetrics fourKeyMetrics = new FourKeyMetrics(deployments, commits);
         return fourKeyMetrics;
     }

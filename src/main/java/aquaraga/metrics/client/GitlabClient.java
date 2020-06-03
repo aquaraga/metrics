@@ -35,13 +35,13 @@ public class GitlabClient implements CIClient {
     }
 
     @Override
-    public Deployments fetchDeployments() {
+    public Deployments fetchDeployments(DurationWindow durationWindow) {
 
         int pageNumber = 1;
         List<Deployment> deploymentsForPage;
         List<Deployment> allDeployments = new ArrayList<>();
         do {
-            deploymentsForPage = getDeploymentsForPage(pageNumber);
+            deploymentsForPage = getDeploymentsForPage(pageNumber, durationWindow);
             allDeployments.addAll(deploymentsForPage);
             pageNumber++;
         } while(deploymentsForPage.size() == 100);
@@ -56,12 +56,12 @@ public class GitlabClient implements CIClient {
     }
 
     @Override
-    public Commits fetchCommits() {
+    public Commits fetchCommits(DurationWindow durationWindow) {
         int pageNumber = 1;
         List<Commit> commitsForPage;
         List<Commit> allCommits = new ArrayList<>();
         do {
-            commitsForPage = getCommitsForPage(pageNumber);
+            commitsForPage = getCommitsForPage(pageNumber, durationWindow);
             allCommits.addAll(commitsForPage);
             pageNumber++;
         } while(commitsForPage.size() == 100);
@@ -73,9 +73,7 @@ public class GitlabClient implements CIClient {
                 .collect(Collectors.toList()));
     }
 
-    private List<Commit> getCommitsForPage(int pageNumber) {
-        DurationWindow durationWindow = new DurationWindow(ciConfiguration.getDeploymentWindowInDays(),
-                ciConfiguration.getShiftLeftInDays());
+    private List<Commit> getCommitsForPage(int pageNumber, DurationWindow durationWindow) {
         String commitsUrl = String.format("%s/repository/commits?per_page=100&page=%d&ref_name=master&since=%s&until=%s",
                 ciConfiguration.getProjectAPIUrl(),
                 pageNumber,
@@ -102,9 +100,7 @@ public class GitlabClient implements CIClient {
         return Arrays.asList(commitsFromGitlab);
     }
 
-    private List<Deployment> getDeploymentsForPage(int pageNumber) {
-        DurationWindow durationWindow = new DurationWindow(ciConfiguration.getDeploymentWindowInDays(),
-                ciConfiguration.getShiftLeftInDays());
+    private List<Deployment> getDeploymentsForPage(int pageNumber, DurationWindow durationWindow) {
         String deploymentsUrl = String.format("%s/deployments?per_page=100&page=%d&environment=%s&sort=desc&order_by=created_at&updated_after=%s&updated_before=%s",
                 ciConfiguration.getProjectAPIUrl(),
                 pageNumber,
