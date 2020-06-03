@@ -22,7 +22,6 @@ public class MetricsApplication implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
-
 		FourKeyMetrics metrics = fourKeyMetricsService.metrics();
 		reportService.consoleOut(metrics);
 	}

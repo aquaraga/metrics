@@ -5,6 +5,7 @@ import aquaraga.metrics.client.dto.Deployment;
 import aquaraga.metrics.config.CIConfiguration;
 import aquaraga.metrics.model.Commits;
 import aquaraga.metrics.model.Deployments;
+import aquaraga.metrics.model.DurationWindow;
 import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -15,7 +16,6 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -74,11 +74,13 @@ public class GitlabClient implements CIClient {
     }
 
     private List<Commit> getCommitsForPage(int pageNumber) {
+        DurationWindow durationWindow = new DurationWindow(ciConfiguration.getDeploymentWindowInDays(),
+                ciConfiguration.getShiftLeftInDays());
         String commitsUrl = String.format("%s/repository/commits?per_page=100&page=%d&ref_name=master&since=%s&until=%s",
                 ciConfiguration.getProjectAPIUrl(),
                 pageNumber,
-                getSinceTime(),
-                getUntilTime());
+                GITLAB_DATE_TIME_FORMATTER.format(durationWindow.beginning()),
+                GITLAB_DATE_TIME_FORMATTER.format(durationWindow.end()));
 
         var client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
@@ -101,12 +103,14 @@ public class GitlabClient implements CIClient {
     }
 
     private List<Deployment> getDeploymentsForPage(int pageNumber) {
+        DurationWindow durationWindow = new DurationWindow(ciConfiguration.getDeploymentWindowInDays(),
+                ciConfiguration.getShiftLeftInDays());
         String deploymentsUrl = String.format("%s/deployments?per_page=100&page=%d&environment=%s&sort=desc&order_by=created_at&updated_after=%s&updated_before=%s",
                 ciConfiguration.getProjectAPIUrl(),
                 pageNumber,
                 ciConfiguration.getProdEnvironmentName(),
-                getSinceTime(),
-                getUntilTime());
+                GITLAB_DATE_TIME_FORMATTER.format(durationWindow.beginning()),
+                GITLAB_DATE_TIME_FORMATTER.format(durationWindow.end()));
 
         var client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
@@ -128,16 +132,4 @@ public class GitlabClient implements CIClient {
         return Arrays.asList(deploymentsFromGitlab);
     }
 
-    private String getSinceTime() {
-        return GITLAB_DATE_TIME_FORMATTER.format
-                (Instant.now()
-                        .minus(ciConfiguration.getShiftLeftInDays(), ChronoUnit.DAYS)
-                        .minus(ciConfiguration.getDeploymentWindowInDays(), ChronoUnit.DAYS));
-    }
-
-    private String getUntilTime() {
-        return GITLAB_DATE_TIME_FORMATTER.format
-                (Instant.now()
-                        .minus(ciConfiguration.getShiftLeftInDays(), ChronoUnit.DAYS));
-    }
 }

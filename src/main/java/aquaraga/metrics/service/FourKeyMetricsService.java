@@ -1,6 +1,7 @@
 package aquaraga.metrics.service;
 
 import aquaraga.metrics.client.CIClient;
+import aquaraga.metrics.config.CIConfiguration;
 import aquaraga.metrics.model.Commits;
 import aquaraga.metrics.model.Deployments;
 import aquaraga.metrics.model.FourKeyMetrics;
@@ -11,10 +12,12 @@ import org.springframework.stereotype.Service;
 public class FourKeyMetricsService {
 
     private CIClient ciClient;
+    private CIConfiguration configuration;
 
     @Autowired
-    public FourKeyMetricsService(CIClient ciClient) {
+    public FourKeyMetricsService(CIClient ciClient, CIConfiguration configuration) {
         this.ciClient = ciClient;
+        this.configuration = configuration;
     }
 
     public FourKeyMetrics metrics() {
