@@ -74,10 +74,11 @@ public class GitlabClient implements CIClient {
     }
 
     private List<Commit> getCommitsForPage(int pageNumber) {
-        String commitsUrl = String.format("%s/repository/commits?per_page=100&page=%d&ref_name=master&since=%s",
+        String commitsUrl = String.format("%s/repository/commits?per_page=100&page=%d&ref_name=master&since=%s&until=%s",
                 ciConfiguration.getProjectAPIUrl(),
                 pageNumber,
-                getThresholdTime());
+                getSinceTime(),
+                getUntilTime());
 
         var client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
@@ -100,11 +101,12 @@ public class GitlabClient implements CIClient {
     }
 
     private List<Deployment> getDeploymentsForPage(int pageNumber) {
-        String deploymentsUrl = String.format("%s/deployments?per_page=100&page=%d&environment=%s&sort=desc&order_by=created_at&updated_after=%s",
+        String deploymentsUrl = String.format("%s/deployments?per_page=100&page=%d&environment=%s&sort=desc&order_by=created_at&updated_after=%s&updated_before=%s",
                 ciConfiguration.getProjectAPIUrl(),
                 pageNumber,
                 ciConfiguration.getProdEnvironmentName(),
-                getThresholdTime());
+                getSinceTime(),
+                getUntilTime());
 
         var client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
@@ -126,8 +128,16 @@ public class GitlabClient implements CIClient {
         return Arrays.asList(deploymentsFromGitlab);
     }
 
-    private String getThresholdTime() {
+    private String getSinceTime() {
         return GITLAB_DATE_TIME_FORMATTER.format
-                        (Instant.now().minus(ciConfiguration.getRunHistoryInDays(), ChronoUnit.DAYS));
+                (Instant.now()
+                        .minus(ciConfiguration.getShiftLeftInDays(), ChronoUnit.DAYS)
+                        .minus(ciConfiguration.getDeploymentWindowInDays(), ChronoUnit.DAYS));
+    }
+
+    private String getUntilTime() {
+        return GITLAB_DATE_TIME_FORMATTER.format
+                (Instant.now()
+                        .minus(ciConfiguration.getShiftLeftInDays(), ChronoUnit.DAYS));
     }
 }

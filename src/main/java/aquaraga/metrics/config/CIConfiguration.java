@@ -12,7 +12,8 @@ public class CIConfiguration {
     private String apiToken;
     private String projectAPIUrl;
     private String prodEnvironmentName;
-    private int runHistoryInDays;
+    private int deploymentWindowInDays;
+    private int shiftLeftInDays;
 
     public String getApiToken() {
         return apiToken;
@@ -38,11 +39,19 @@ public class CIConfiguration {
         this.prodEnvironmentName = prodEnvironmentName;
     }
 
-    public int getRunHistoryInDays() {
-        return runHistoryInDays;
+    public int getDeploymentWindowInDays() {
+        return deploymentWindowInDays;
     }
 
-    public void setRunHistoryInDays(int runHistoryInDays) {
-        this.runHistoryInDays = runHistoryInDays;
+    public void setDeploymentWindowInDays(int deploymentWindowInDays) {
+        this.deploymentWindowInDays = deploymentWindowInDays;
+    }
+
+    public int getShiftLeftInDays() {
+        return shiftLeftInDays;
+    }
+
+    public void setShiftLeftInDays(int shiftLeftInDays) {
+        this.shiftLeftInDays = shiftLeftInDays;
     }
 }
