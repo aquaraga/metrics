@@ -2,6 +2,7 @@ package aquaraga.metrics.model;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 
 public class LeadTimeOddity {
     private DeployedCommit deployedCommit;
@@ -11,10 +12,18 @@ public class LeadTimeOddity {
         this.deployedCommit = deployedCommit;
     }
 
+    public Duration leadTime() {
+        return deployedCommit.getLeadTime();
+    }
+
     @Override
     public String toString() {
         DateFormat formatter = new SimpleDateFormat(DATE_FORMAT);
-        return String.format("Commit %s made on %s was deployed on %s", deployedCommit.getCommitSha(),
+        Duration leadTime = leadTime();
+        return String.format("[%d days %d hours] Commit %s made on %s was deployed on %s",
+                leadTime.toDays(),
+                leadTime.toHoursPart(),
+                deployedCommit.getCommitSha(),
                 formatter.format(deployedCommit.getCommitedTime()),
                 formatter.format(deployedCommit.getDeploymentTime()));
     }

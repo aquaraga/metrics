@@ -18,10 +18,10 @@ public class LeadTimeMetrics {
                 .dividedBy(deployedCommits.size());
     }
 
-    public List<LeadTimeOddity> oddities(Duration threshold) {
-        return this.deployedCommits.stream()
+    public LeadTimeOddities oddities(Duration threshold) {
+        return new LeadTimeOddities(this.deployedCommits.stream()
                 .filter(d -> d.getLeadTime().compareTo(threshold) > 0)
                 .map(LeadTimeOddity::new)
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
     }
 }

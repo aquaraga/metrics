@@ -16,6 +16,7 @@ public class ReportService {
         System.out.printf("Deployment frequency: %d\n", fourKeyMetrics.deploymentFrequency());
         System.out.printf("Change failure rate: %d%%\n", (int) Math.round(fourKeyMetrics.changeFailureRate() * 100));
 
-        System.out.println("Lead time oddities: " + leadTimeMetrics.oddities(Duration.ofDays(10)));
+        System.out.println("Lead time oddities (commits with lead time >= 10 days):\n" +
+                leadTimeMetrics.oddities(Duration.ofDays(10)));
     }
 }
