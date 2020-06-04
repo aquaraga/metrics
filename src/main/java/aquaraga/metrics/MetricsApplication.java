@@ -1,5 +1,7 @@
 package aquaraga.metrics;
 
+import aquaraga.metrics.config.CIConfiguration;
+import aquaraga.metrics.model.DurationWindow;
 import aquaraga.metrics.model.FourKeyMetrics;
 import aquaraga.metrics.service.FourKeyMetricsService;
 import aquaraga.metrics.service.ReportService;
@@ -15,6 +17,8 @@ public class MetricsApplication implements CommandLineRunner {
 	FourKeyMetricsService fourKeyMetricsService;
 	@Autowired
 	ReportService reportService;
+	@Autowired
+	CIConfiguration ciConfiguration;
 
 	public static void main(String[] args) {
 		SpringApplication.run(MetricsApplication.class, args);
@@ -22,6 +26,22 @@ public class MetricsApplication implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
+//		pointInTime();
+		trend();
+	}
+
+	private void trend() {
+		//Report metrics every 14 days for the last 140 days
+		for (int shiftLeft = 140; shiftLeft >= 0; shiftLeft-=14) {
+			DurationWindow durationWindow =
+					new DurationWindow(ciConfiguration.getDeploymentWindowInDays(), shiftLeft);
+			FourKeyMetrics metrics = fourKeyMetricsService.metrics(
+					durationWindow);
+			reportService.consoleOutTrend(durationWindow, metrics);
+		}
+	}
+
+	private void pointInTime() {
 		FourKeyMetrics metrics = fourKeyMetricsService.metrics();
 		reportService.consoleOut(metrics);
 	}

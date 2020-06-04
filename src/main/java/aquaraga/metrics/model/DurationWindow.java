@@ -1,6 +1,8 @@
 package aquaraga.metrics.model;
 
 import java.time.Instant;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAccessor;
 
@@ -30,4 +32,5 @@ public class DurationWindow {
     public TemporalAccessor end() {
         return Instant.now().minus(shiftLeftInDays, ChronoUnit.DAYS);
     }
+
 }
