@@ -28,13 +28,20 @@ public class MetricsApplication implements CommandLineRunner {
 	public void run(String... args) throws Exception {
 //		pointInTime();
 		trend();
+//		forWindow();
+	}
+
+	private void forWindow() {
+		FourKeyMetrics metrics = fourKeyMetricsService
+				.metrics(new DurationWindow(14,140));
+		reportService.consoleOut(metrics);
 	}
 
 	private void trend() {
 		//Report metrics every 14 days for the last 140 days
 		for (int shiftLeft = 140; shiftLeft >= 0; shiftLeft-=14) {
 			DurationWindow durationWindow =
-					new DurationWindow(ciConfiguration.getDeploymentWindowInDays(), shiftLeft);
+					new DurationWindow(14, shiftLeft);
 			FourKeyMetrics metrics = fourKeyMetricsService.metrics(
 					durationWindow);
 			reportService.consoleOutTrend(durationWindow, metrics);

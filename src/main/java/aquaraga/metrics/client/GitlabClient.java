@@ -61,7 +61,11 @@ public class GitlabClient implements CIClient {
         List<Commit> commitsForPage;
         List<Commit> allCommits = new ArrayList<>();
         do {
-            commitsForPage = getCommitsForPage(pageNumber, durationWindow);
+            commitsForPage = getCommitsForPage(String.format("%s/repository/commits?per_page=100&page=%d&ref_name=master&since=%s&until=%s",
+                    ciConfiguration.getProjectAPIUrl(),
+                    pageNumber,
+                    GITLAB_DATE_TIME_FORMATTER.format(durationWindow.beginning()),
+                    GITLAB_DATE_TIME_FORMATTER.format(durationWindow.end())));
             allCommits.addAll(commitsForPage);
             pageNumber++;
         } while(commitsForPage.size() == 100);
@@ -73,13 +77,61 @@ public class GitlabClient implements CIClient {
                 .collect(Collectors.toList()));
     }
 
-    private List<Commit> getCommitsForPage(int pageNumber, DurationWindow durationWindow) {
-        String commitsUrl = String.format("%s/repository/commits?per_page=100&page=%d&ref_name=master&since=%s&until=%s",
-                ciConfiguration.getProjectAPIUrl(),
-                pageNumber,
-                GITLAB_DATE_TIME_FORMATTER.format(durationWindow.beginning()),
-                GITLAB_DATE_TIME_FORMATTER.format(durationWindow.end()));
+    @Override
+    public Deployments successfulDeploymentsPreceding(aquaraga.metrics.model.Deployment deployment) {
 
+        String deploymentsUrl = String.format("%s/deployments?per_page=100&page=1&status=success&environment=%s&sort=desc&order_by=created_at&updated_before=%s",
+                ciConfiguration.getProjectAPIUrl(),
+                ciConfiguration.getProdEnvironmentName(),
+                GITLAB_DATE_TIME_FORMATTER.format(deployment.timeDeployed().toInstant()));
+
+        var client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(deploymentsUrl))
+                .header("PRIVATE-TOKEN", ciConfiguration.getApiToken())
+                .GET()
+                .build();
+        Deployment[] allDeployments;
+        try {
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() != 200) {
+                throw new RuntimeException(String.format("Response code for %s is %d", deploymentsUrl, response.statusCode()));
+            }
+            allDeployments = new Gson().fromJson(response.body(), Deployment[].class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error when fetching deployments from Gitlab", e);
+        }
+        return new Deployments(Arrays.stream(allDeployments)
+                .map(d -> new aquaraga.metrics.model.Deployment(d.getStatus(),
+                        d.getDeployable().getCommit().getId(),
+                        Date.from(LocalDateTime.parse(d.getUpdated_at().substring(0, d.getUpdated_at().indexOf('.'))).atZone(ZoneId.systemDefault()).toInstant())))
+                .collect(Collectors.toList()));
+    }
+
+    @Override
+    public Commits fetchCommitsBetween(String olderSha, String newerSha) {
+        int pageNumber = 1;
+        List<Commit> commitsForPage;
+        List<Commit> allCommits = new ArrayList<>();
+        do {
+            commitsForPage = getCommitsForPage(String.format("%s/repository/commits?per_page=100&page=%d&ref_name=%s..%s",
+                    ciConfiguration.getProjectAPIUrl(),
+                    pageNumber,
+                    olderSha,
+                    newerSha));
+            allCommits.addAll(commitsForPage);
+            pageNumber++;
+        } while(commitsForPage.size() == 100);
+
+        return new Commits(allCommits.stream()
+                .map(c -> new aquaraga.metrics.model.Commit(c.getId(),
+                        Date.from(LocalDateTime.parse(c.getCommitted_date().substring(0, c.getCommitted_date().indexOf('.'))).atZone(ZoneId.systemDefault()).toInstant()),
+                        c.getParent_ids()))
+                .collect(Collectors.toList()));
+    }
+
+    private List<Commit> getCommitsForPage(String commitsUrl) {
         var client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(commitsUrl))

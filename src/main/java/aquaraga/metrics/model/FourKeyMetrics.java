@@ -35,9 +35,9 @@ public class FourKeyMetrics {
                 deploymentTime = deployment.timeDeployed();
             } else {
 //                Skip non-merge commits
-                if (!commit.isMerge()) {
-                    continue;
-                }
+//                if (!commit.isMerge()) {
+//                    continue;
+//                }
             }
             deployedCommits.add(new DeployedCommit(commit, deploymentTime));
         }

@@ -12,10 +12,14 @@ public class LeadTimeMetrics {
     }
 
     public Duration mean() {
+        int numberOfDeployments = deployedCommits.size();
+        if (numberOfDeployments == 0) {
+            return null;
+        }
         return this.deployedCommits.stream()
                 .map(DeployedCommit::getLeadTime)
                 .reduce(Duration.ZERO, Duration::plus)
-                .dividedBy(deployedCommits.size());
+                .dividedBy(numberOfDeployments);
     }
 
     public LeadTimeOddities oddities(Duration threshold) {

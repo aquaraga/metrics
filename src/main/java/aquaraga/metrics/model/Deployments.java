@@ -49,4 +49,11 @@ public class Deployments {
     private long countByStatus(String status) {
         return this.deployments.stream().filter(x -> x.getStatus().equalsIgnoreCase(status)).count();
     }
+
+    public Deployment earliestSuccessful() {
+        return deployments.stream()
+                .filter(x -> x.getStatus().equalsIgnoreCase("success"))
+                .min(Comparator.comparing(Deployment::timeDeployed))
+                .orElse(null);
+    }
 }

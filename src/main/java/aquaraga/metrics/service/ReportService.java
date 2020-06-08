@@ -15,7 +15,15 @@ import java.util.Locale;
 public class ReportService {
     public void consoleOut(FourKeyMetrics fourKeyMetrics) {
         LeadTimeMetrics leadTimeMetrics = fourKeyMetrics.leadTime();
+        if (leadTimeMetrics == null) {
+            System.out.println("No deployment data found for the duration");
+            return;
+        }
         Duration meanLeadTime = leadTimeMetrics.mean();
+        if (meanLeadTime == null) {
+            System.out.println("No deployment data found for the duration");
+            return;
+        }
         System.out.printf("Average Lead Time: %d days %d hours\n", meanLeadTime.toDays(),
                 meanLeadTime.toHoursPart());
         System.out.printf("Deployment frequency: %d\n", fourKeyMetrics.deploymentFrequency());
@@ -26,11 +34,24 @@ public class ReportService {
     }
 
     public void consoleOutTrend(DurationWindow duration, FourKeyMetrics fourKeyMetrics) {
-        LeadTimeMetrics leadTimeMetrics = fourKeyMetrics.leadTime();
-        Duration meanLeadTime = leadTimeMetrics.mean();
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)
                 .withLocale(Locale.US)
                 .withZone(ZoneId.systemDefault());
+        LeadTimeMetrics leadTimeMetrics = fourKeyMetrics.leadTime();
+        if (leadTimeMetrics == null) {
+            System.out.printf("%s - %s,-,0,-\n",
+                    dateTimeFormatter.format(duration.beginning()),
+                    dateTimeFormatter.format(duration.end()));
+            return;
+        }
+        Duration meanLeadTime = leadTimeMetrics.mean();
+        if (meanLeadTime == null) {
+            System.out.printf("%s - %s,-,0,-\n",
+                    dateTimeFormatter.format(duration.beginning()),
+                    dateTimeFormatter.format(duration.end()));
+            return;
+        }
+
         System.out.printf("%s - %s,%d days %d hours,%d,%d%%\n",
                 dateTimeFormatter.format(duration.beginning()),
                 dateTimeFormatter.format(duration.end()),
