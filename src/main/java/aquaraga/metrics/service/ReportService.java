@@ -52,11 +52,10 @@ public class ReportService {
             return;
         }
 
-        System.out.printf("%s - %s,%d days %d hours,%d,%d%%\n",
+        System.out.printf("%s - %s,% .2f,%d,%d%%\n",
                 dateTimeFormatter.format(duration.beginning()),
                 dateTimeFormatter.format(duration.end()),
-                meanLeadTime.toDays(),
-                meanLeadTime.toHoursPart(), fourKeyMetrics.deploymentFrequency(),
+                meanLeadTime.toDays() + (meanLeadTime.toHoursPart()/24.0), fourKeyMetrics.deploymentFrequency(),
                 (int) Math.round(fourKeyMetrics.changeFailureRate() * 100));
 
     }
